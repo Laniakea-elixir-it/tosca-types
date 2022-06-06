@@ -1,0 +1,46 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    docker_bridge_ip_cidr: "172.0.17.1/24"
+  tasks:
+    - name: Call Docker role
+      include_role:
+        name: indigo-dc.docker
+
+    - block:
+
+      - name: Call IndigoVR role as standalone
+        include_role:
+          name: indigo-dc.indigovr
+        vars:
+          INDIGOVR_NODE_TYPE: standalone
+          # I use the master_ips, that is the private IPs 
+          # we should use the public one, but we will launch the 
+          # LB allways in the same site as the mesos master
+          INDIGOVR_CENTRALPOINT_IP: '{{ master_ips[0] }}'
+          INDIGOVR_MTU: 1400
+
+      - name: Refresh setup data to get new ansible_tun0 item
+        setup:
+
+      - name: Set facts in case of Hybrid cluster
+        set_fact:
+          master_ips: "{{ groups['mesos_master_server']|map('extract', hostvars,'ansible_tun0')|list|map(attribute='ipv4.address')|list }}"
+
+      when: lb_hybrid_cluster
+
+
+    - set_fact: 
+        marathon_lb_marathon_url: "https://{{ master_ips[0]  }}:8443"
+        marathon_lb_service_discovery: "none" 
+
+    - name: Call marathon-lb role
+      include_role:
+        name: indigo-dc.marathon-lb
+      vars:
+        marathon_lb_auth_creds: "{{marathon_username}}:{{marathon_password}}"
+        marathon_lb_marathon_servers: "{{ master_ips }}"
+        marathon_lb_chronos_servers: "{{ master_ips }}"
+        marathon_lb_mesos_servers: "{{ master_ips }}"
+        marathon_lb_image: 'mesosphere/marathon-lb:v1.15.0'

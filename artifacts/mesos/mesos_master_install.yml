@@ -1,0 +1,78 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    docker_bridge_ip_cidr: "172.0.17.1/24"
+    vnode_prefix: vnode-
+
+#  pre_tasks:
+#    - name: "Add nodes mapping in hosts file"
+#      lineinfile: dest=/etc/hosts regexp='.*{{ item.1 }}.*$' line="{{ item.1 }} {{ vnode_prefix }}{{ item.0 + 1 }} {{ vnode_prefix }}{{ item.0 + 1 }}.localdomain" state=present
+#      with_indexed_items: '{{ wn_ips }}'
+
+  pre_tasks:
+
+    - name: "Create shared directory"
+      file:
+        path: /data
+        state: directory
+      when: "enable_nfs_share == true"
+
+  tasks:
+    - name: Call NFS role as server
+      include_role:
+        name: indigo-dc.nfs
+      vars:
+        nfs_mode: 'server'
+        nfs_exports: [{path: "/data", export: "{{ vnode_prefix }}*.localdomain(fsid=0,rw,async,no_root_squash,no_subtree_check,insecure)"}]
+      when: "enable_nfs_share == true"
+
+    - block:
+
+      - name: Call IndigoVR role as Centralpoint
+        include_role:
+          name: indigo-dc.indigovr
+        vars:
+          INDIGOVR_NODE_TYPE: centralpoint
+          INDIGOVR_MTU: 1400
+
+      - name: Refresh setup data to get new ansible_tun0 item
+        setup:
+
+      - name: Set facts in case of Hybrid cluster
+        set_fact:
+          mesos_masters_list_ips: "{{ groups['mesos_master_server']|map('extract', hostvars,'ansible_tun0')|list|map(attribute='ipv4.address')|list }}"
+
+      when: fe_hybrid_cluster
+
+    - name: Call zookeeper role
+      include_role:
+        name: ansible-role-zookeeper
+      vars:
+        zookeeper_host_list: "{{ mesos_masters_list_ips }}"
+
+    - name: Call mesos role as master
+      include_role:
+        name: ansible-role-mesos
+      vars:
+        mesos_install_mode: "master"
+        zookeeper_peers: "{{ mesos_masters_list_ips }}"
+        mesos_masters_list: "{{ mesos_masters_list_ips }}"
+        mesos_hostname: "{{ dns_name }}"
+
+    - name: Call marathon role
+      include_role:
+        name: ansible-role-marathon
+      vars:
+        zookeeper_peers: "{{ mesos_masters_list_ips }}"
+        marathon_hostname: "{{ dns_name }}"
+   
+    - name: Call chronos role
+      include_role:
+        name: ansible-role-chronos
+      vars:
+        zookeeper_peers: "{{ mesos_masters_list_ips }}"
+        chronos_hostname: "{{ dns_name }}"
+      when: "enable_chronos == true"
+
+      
