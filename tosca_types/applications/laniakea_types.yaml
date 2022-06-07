@@ -1,0 +1,58 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - indigo_cluster_types: https://raw.githubusercontent.com/Laniakea-elixir-it/tosca-types/master/tosca_types/base/cluster_basic_types.yaml
+
+metadata:
+  template_author: Laniakea
+  template_name: laniakea_types
+  template_version: 1.0.0
+
+artifact_types:
+
+  tosca.artifacts.Implementation.YAML:
+    derived_from: tosca.artifacts.Implementation
+    description: YAML Ansible recipe artifact
+    mime_type: text/yaml
+    file_ext: [ yaml, yml ]
+
+  tosca.artifacts.AnsibleGalaxy.role:
+    derived_from: tosca.artifacts.Root
+    description: Ansible Galaxy role to be deployed in the target node
+
+node_types:
+
+  tosca.nodes.indigo.NFS:
+    derived_from: tosca.nodes.SoftwareComponent
+    properties:
+      nfs_node:
+        type: string
+        description: could be server or client
+        required: true
+      nfs_server_export_dir:
+        type: string
+        description: path to share
+        default: /export
+        required: false
+      nfs_server_ip:
+        type: string
+        description: IP of the NFS server
+        required: false
+      client_mountpoint:
+        type: string
+        description: client mountpoint
+        default: /export
+        required: false
+    artifacts:
+      nfs_role:
+        file: laniakea.nfs,master
+        type: tosca.artifacts.AnsibleGalaxy.role
+    interfaces:
+      Standard:
+        configure:
+          implementation: https://raw.githubusercontent.com/Laniakea-elixir-it/tosca-types/master/artifacts/laniakea/nfs_config.yml
+          inputs:
+            nfs_node: { get_property: [ SELF, nfs_node ] }
+            nfs_server_export_dir: { get_property: [ SELF, nfs_server_export_dir ] }
+            nfs_server_ip: { get_property: [ SELF, nfs_server_ip ] }
+            client_mountpoint: { get_property: [ SELF, client_mountpoint ] }
