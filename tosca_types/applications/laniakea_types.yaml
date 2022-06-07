@@ -22,7 +22,7 @@ artifact_types:
 
 node_types:
 
-  tosca.nodes.Laniakea.NFS:
+  tosca.nodes.indigo.NFS:
     derived_from: tosca.nodes.SoftwareComponent
     properties:
       nfs_node:
