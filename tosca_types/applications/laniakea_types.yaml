@@ -29,23 +29,23 @@ node_types:
         type: string
         description: could be server or client
         required: true
-      nfs_server_export_dir:
+      nfs_exports:
         type: string
         description: path to share
-        default: /export
+        default: []
         required: false
       nfs_server_ip:
         type: string
         description: IP of the NFS server
         required: false
-      client_mountpoint:
+      nfs_client_imports:
         type: string
         description: client mountpoint
-        default: /export
+        default:  []
         required: false
     artifacts:
       nfs_role:
-        file: laniakea.nfs,master
+        file: laniakea.nfs
         type: tosca.artifacts.AnsibleGalaxy.role
     interfaces:
       Standard:
@@ -53,6 +53,6 @@ node_types:
           implementation: https://raw.githubusercontent.com/Laniakea-elixir-it/tosca-types/master/artifacts/laniakea/nfs_config.yml
           inputs:
             nfs_node: { get_property: [ SELF, nfs_node ] }
-            nfs_server_export_dir: { get_property: [ SELF, nfs_server_export_dir ] }
+            nfs_server_exports: { get_property: [ SELF, nfs_server_exports ] }
             nfs_server_ip: { get_property: [ SELF, nfs_server_ip ] }
-            client_mountpoint: { get_property: [ SELF, client_mountpoint ] }
+            nfs_client_imports: { get_property: [ SELF, nfs_client_imports ] }
