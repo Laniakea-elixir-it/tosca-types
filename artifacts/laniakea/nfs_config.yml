@@ -1,0 +1,15 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+     vnode_prefix: vnode-
+  roles:
+    - role: indigo-dc.nfs
+      nfs_mode: 'server'
+      nfs_exports: [{path: "{{ nfs_server_export_dir }}", export: "{{ vnode_prefix }}*.localdomain(rw,async,no_root_squash,no_subtree_check,insecure)"}]
+      when: nfs_node == 'server'
+
+    - role: indigo-dc.nfs
+      nfs_mode: 'client'
+      nfs_client_imports: [{ local: "{{ client_mountpoint }}", remote: "{{ nfs_server_export_dir }}", server_host: "{{ nfs_server_ip }}" }]
+      when: nfs_node == 'client'
