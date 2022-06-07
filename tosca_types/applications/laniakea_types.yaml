@@ -53,6 +53,6 @@ node_types:
           implementation: https://raw.githubusercontent.com/Laniakea-elixir-it/tosca-types/master/artifacts/laniakea/nfs_config.yml
           inputs:
             nfs_node: { get_property: [ SELF, nfs_node ] }
-            nfs_server_exports: { get_property: [ SELF, nfs_server_exports ] }
+            nfs_exports: { get_property: [ SELF, nfs_exports ] }
             nfs_server_ip: { get_property: [ SELF, nfs_server_ip ] }
             nfs_client_imports: { get_property: [ SELF, nfs_client_imports ] }
