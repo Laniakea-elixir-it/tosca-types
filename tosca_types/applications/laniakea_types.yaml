@@ -35,6 +35,8 @@ node_types:
         description: path to share
         entry_schema:
           type: map
+          entry_schema:
+            type: string
         default: []
         required: false
       nfs_server_ip:
@@ -46,6 +48,8 @@ node_types:
         description: client mountpoint
         entry_schema:
           type: map
+          entry_schema:
+            type: string
         default:  []
         required: false
     artifacts:
