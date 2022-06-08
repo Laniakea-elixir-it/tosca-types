@@ -31,7 +31,7 @@ node_types:
         description: could be server or client
         required: true
       nfs_exports:
-        type: string
+        type: list
         description: path to share
         default: []
         required: false
@@ -40,7 +40,7 @@ node_types:
         description: IP of the NFS server
         required: false
       nfs_client_imports:
-        type: string
+        type: list
         description: client mountpoint
         default:  []
         required: false
