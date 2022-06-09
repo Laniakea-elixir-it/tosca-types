@@ -69,7 +69,7 @@ node_types:
         configure:
           implementation: https://raw.githubusercontent.com/Laniakea-elixir-it/tosca-types/master/artifacts/laniakea/htcondor/condor_cm_install.yml
           inputs:
-            condor_daemons: { get_property: [ SELF, condor_daemonst ] }
+            condor_daemons: { get_property: [ SELF, condor_daemons ] }
 
   #tosca.nodes.indigo.MesosSlave:
   #  derived_from: tosca.nodes.indigo.LRMS.WorkerNode.Mesos
