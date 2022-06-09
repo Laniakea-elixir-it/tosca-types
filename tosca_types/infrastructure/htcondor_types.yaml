@@ -67,7 +67,7 @@ node_types:
     interfaces:
       Standard:
         configure:
-          implementation: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/artifacts/mesos/mesos_master_install.yml
+          implementation: https://raw.githubusercontent.com/Laniakea-elixir-it/tosca-types/master/artifacts/laniakea/htcondor/condor_cm_install.yml
           inputs:
             condor_daemons: { get_property: [ SELF, condor_daemonst ] }
 
