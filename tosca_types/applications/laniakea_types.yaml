@@ -26,7 +26,7 @@ node_types:
   tosca.nodes.Laniakea.NFS:
     derived_from: tosca.nodes.SoftwareComponent
     properties:
-      nfs_node:
+      nfs_mode:
         type: string
         description: could be server or client
         required: true
@@ -38,10 +38,6 @@ node_types:
           entry_schema:
             type: string
         default: []
-        required: false
-      nfs_server_ip:
-        type: string
-        description: IP of the NFS server
         required: false
       nfs_client_imports:
         type: list
@@ -61,7 +57,6 @@ node_types:
         configure:
           implementation: https://raw.githubusercontent.com/Laniakea-elixir-it/tosca-types/master/artifacts/laniakea/nfs_config.yml
           inputs:
-            nfs_node: { get_property: [ SELF, nfs_node ] }
+            nfs_mode: { get_property: [ SELF, nfs_mode ] }
             nfs_exports: { get_property: [ SELF, nfs_exports ] }
-            nfs_server_ip: { get_property: [ SELF, nfs_server_ip ] }
             nfs_client_imports: { get_property: [ SELF, nfs_client_imports ] }
