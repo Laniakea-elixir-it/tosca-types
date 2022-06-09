@@ -1,0 +1,180 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - indigo_cluster_types: https://baltig.infn.it/infn-cloud/tosca-types/-/raw/master/tosca_types/base/cluster_basic_types.yaml
+metadata:
+  template_author: Laniakea
+  template_name: htcondor_types
+  template_version: 1.0.0
+
+
+artifact_types:
+
+  tosca.artifacts.Implementation.YAML:
+    derived_from: tosca.artifacts.Implementation
+    description: YAML Ansible recipe artifact
+    mime_type: text/yaml
+    file_ext: [ yaml, yml ]
+
+  tosca.artifacts.AnsibleGalaxy.role:
+    derived_from: tosca.artifacts.Root
+    description: Ansible Galaxy role to be deployed in the target node
+
+
+capability_types:
+
+  tosca.capabilities.indigo.LRMS.Condor:
+    derived_from: tosca.capabilities.indigo.LRMS
+    properties:
+      type:
+        type: string
+        required: true
+        default: condor
+        constraints:
+          - equal: condor
+
+  tosca.capabilities.indigo.CondorWN:
+    derived_from: tosca.capabilities.Container
+
+  tosca.capabilities.indigo.CondorCM:
+    derived_from: tosca.capabilities.indigo.ClusterMaster
+
+node_types:
+
+  tosca.nodes.indigo.CondorCM:
+    derived_from: tosca.nodes.indigo.LRMS.FrontEnd.Condor
+
+  tosca.nodes.indigo.LRMS.FrontEnd.Condor:
+    derived_from: tosca.nodes.indigo.LRMS.FrontEnd
+    metadata:
+      icon: /images/htcondor.png
+    capabilities:
+        lrms:
+          type: tosca.capabilities.indigo.LRMS.Condor
+        host:
+          type: tosca.capabilities.indigo.CondorCM
+    properties:
+      condor_daemons:
+        type: list
+        required: yes
+        entry_schema:
+          type: string
+        default: []
+    artifacts:
+      htcondor_role:
+        file: laniakea.htcondor,master
+        type: tosca.artifacts.AnsibleGalaxy.role
+    interfaces:
+      Standard:
+        configure:
+          implementation: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/artifacts/mesos/mesos_master_install.yml
+          inputs:
+            condor_daemons: { get_property: [ SELF, condor_daemonst ] }
+
+  #tosca.nodes.indigo.MesosSlave:
+  #  derived_from: tosca.nodes.indigo.LRMS.WorkerNode.Mesos
+
+  #tosca.nodes.indigo.LRMS.WorkerNode.Mesos:
+  #  derived_from: tosca.nodes.indigo.LRMS.WorkerNode
+  #  metadata:
+  #    icon: /images/mesos.png
+  #  capabilities:
+  #      host:
+  #        type: tosca.capabilities.indigo.MesosSlave
+  #  properties:
+  #    # Set the current data of the mesos server
+  #    # but it can also specified in the TOSCA document
+  #    master_ips:
+  #      required: yes
+  #      type: list
+  #      entry_schema:
+  #        type: string
+  #    enable_nfs_share:
+  #      type: boolean
+  #      required: no
+  #      default: false
+  #    enable_consul_sd:
+  #      type: boolean
+  #      required: no
+  #      default: true
+  #    enable_gpu_support:
+  #      type: boolean
+  #      required: no
+  #      default: false
+  #  artifacts:
+  #    docker_agent_role:
+  #      file: indigo-dc.docker,2.1.2-beta
+  #      #file: git+https://github.com/indigo-dc/ansible-role-docker.git,fix/issue_13
+  #      type: tosca.artifacts.AnsibleGalaxy.role
+  #    mesos_agent_role:
+  #      file: git+https://github.com/indigo-dc/ansible-role-mesos.git,dev
+  #      type: tosca.artifacts.AnsibleGalaxy.role
+  #    nfs_role:
+  #      file: indigo-dc.nfs,master
+  #      type: tosca.artifacts.AnsibleGalaxy.role
+  #    openvpn_role:
+  #      file: indigo-dc.indigovr,master
+  #      type: tosca.artifacts.AnsibleGalaxy.role
+  #  interfaces:
+  #    Standard:
+  #      create:
+  #        implementation: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/artifacts/mesos/mesos_slave_install.yml
+  #        inputs:
+  #          mesos_masters_list_ips: { get_property: [ SELF, master_ips ] }
+  #          enable_nfs_share: { get_property: [ SELF, enable_nfs_share ] }
+  #          enable_consul_sd: { get_property: [ SELF, enable_consul_sd ] }
+  #          mesos_enable_gpu_support: { get_property: [ SELF, enable_gpu_support ] }
+  #          front_end_ip: { get_property: [ SELF, front_end_ip ] }
+  #          public_front_end_ip: { get_property: [ SELF, public_front_end_ip ] }
+  #          wn_hybrid_cluster:  { get_property: [ SELF, hybrid] }
+
+
+
+  #tosca.nodes.indigo.MesosLoadBalancer:
+  #  derived_from: tosca.nodes.SoftwareComponent
+  #  metadata:
+  #    icon: /images/mesos.png
+  #  properties:
+  #    master_ips:
+  #      required: yes
+  #      type: list
+  #      entry_schema:
+  #        type: string
+  #    marathon_username:
+  #      type: string
+  #      required: no
+  #      default: admin
+  #    marathon_password:
+  #      type: string
+  #      required: yes
+  #    hybrid:
+  #      type: boolean
+  #      description: Flag to specify that this ElasticCluster will work in a hybrid environment
+  #      default: false
+  #      required: false
+  #  artifacts:
+  #    docker_agent_role:
+  #      file: indigo-dc.docker,master
+  #      type: tosca.artifacts.AnsibleGalaxy.role
+  #    marathon_lb_role:
+  #      file: indigo-dc.marathon-lb,master
+  #      type: tosca.artifacts.AnsibleGalaxy.role
+  #    openvpn_role:
+  #      file: indigo-dc.indigovr,master
+  #      type: tosca.artifacts.AnsibleGalaxy.role
+  #  interfaces:
+  #    Standard:
+  #      create:
+  #        implementation: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/artifacts/mesos/mesos_lb_install.yml
+  #        inputs:
+  #          master_ips: { get_property: [ SELF, master_ips ] }
+  #          marathon_username: { get_property: [ SELF, marathon_username ] }
+  #          marathon_password: { get_property: [ SELF, marathon_password ] }
+  #          lb_hybrid_cluster: { get_property: [ SELF, hybrid ] }
+  #  requirements:
+  #    - host:
+  #        capability: tosca.capabilities.Container
+  #        node: tosca.nodes.indigo.Compute
+  #        relationship: tosca.relationships.HostedOn
+
+
