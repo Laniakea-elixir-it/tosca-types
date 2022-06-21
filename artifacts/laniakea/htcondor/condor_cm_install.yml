@@ -7,7 +7,7 @@
   roles:
     - role: laniakea.htcondor
       condor_host: localhost
-      condor_allow_write: *
-      condor_network_interface: *
+      condor_allow_write: "*"
+      condor_network_interface: "*"
       condor_fs_domain: laniakea
       condor_uid_domain: laniakea
