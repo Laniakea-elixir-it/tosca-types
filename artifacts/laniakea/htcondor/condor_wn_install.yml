@@ -1,0 +1,15 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+     vnode_prefix: vnode-
+
+  roles:
+    - role: laniakea.htcondor
+      condor_host: localhost
+      condor_allow_write: "*"
+      condor_allow_negotiator: "$(ALLOW_WRITE)"
+      condor_allow_administrator: "*"
+      condor_network_interface: "*"
+      condor_fs_domain: laniakea
+      condor_uid_domain: laniakea
