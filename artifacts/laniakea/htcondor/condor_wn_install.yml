@@ -6,7 +6,6 @@
 
   roles:
     - role: laniakea.htcondor
-      condor_host: localhost
       condor_allow_write: "*"
       condor_allow_negotiator: "$(ALLOW_WRITE)"
       condor_allow_administrator: "*"
