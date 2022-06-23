@@ -33,7 +33,7 @@ capability_types:
         constraints:
           - equal: condor
 
-  tosca.capabilities.indigo.CondorWN:
+  tosca.capabilities.indigo.CondorExecute:
     derived_from: tosca.capabilities.Container
 
   tosca.capabilities.indigo.CondorCM:
