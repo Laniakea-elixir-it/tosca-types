@@ -62,7 +62,7 @@ node_types:
         default: []
     artifacts:
       htcondor_role:
-        file: laniakea.htcondor
+        file: laniakea.htcondor,master
         type: tosca.artifacts.AnsibleGalaxy.role
     interfaces:
       Standard:
@@ -95,7 +95,7 @@ node_types:
         type: string
     artifacts:
       htcondor_role:
-        file: laniakea.htcondor
+        file: laniakea.htcondor,master
         type: tosca.artifacts.AnsibleGalaxy.role
     interfaces:
       Standard:
