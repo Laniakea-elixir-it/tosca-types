@@ -33,6 +33,9 @@ capability_types:
         constraints:
           - equal: condor
 
+  tosca.capabilities.indigo.CondorSubmit:
+    derived_from: tosca.capabilities.Container
+
   tosca.capabilities.indigo.CondorExecute:
     derived_from: tosca.capabilities.Container
 
@@ -105,54 +108,33 @@ node_types:
             condor_host: { get_property: [ SELF, condor_master_ip ] }
             condor_daemons: { get_property: [ SELF, condor_daemons ] }
 
-
-
-
-  #tosca.nodes.indigo.MesosLoadBalancer:
-  #  derived_from: tosca.nodes.SoftwareComponent
-  #  metadata:
-  #    icon: /images/mesos.png
-  #  properties:
-  #    master_ips:
-  #      required: yes
-  #      type: list
-  #      entry_schema:
-  #        type: string
-  #    marathon_username:
-  #      type: string
-  #      required: no
-  #      default: admin
-  #    marathon_password:
-  #      type: string
-  #      required: yes
-  #    hybrid:
-  #      type: boolean
-  #      description: Flag to specify that this ElasticCluster will work in a hybrid environment
-  #      default: false
-  #      required: false
-  #  artifacts:
-  #    docker_agent_role:
-  #      file: indigo-dc.docker,master
-  #      type: tosca.artifacts.AnsibleGalaxy.role
-  #    marathon_lb_role:
-  #      file: indigo-dc.marathon-lb,master
-  #      type: tosca.artifacts.AnsibleGalaxy.role
-  #    openvpn_role:
-  #      file: indigo-dc.indigovr,master
-  #      type: tosca.artifacts.AnsibleGalaxy.role
-  #  interfaces:
-  #    Standard:
-  #      create:
-  #        implementation: https://baltig.infn.it/infn-cloud/tosca-types/raw/master/artifacts/mesos/mesos_lb_install.yml
-  #        inputs:
-  #          master_ips: { get_property: [ SELF, master_ips ] }
-  #          marathon_username: { get_property: [ SELF, marathon_username ] }
-  #          marathon_password: { get_property: [ SELF, marathon_password ] }
-  #          lb_hybrid_cluster: { get_property: [ SELF, hybrid ] }
-  #  requirements:
-  #    - host:
-  #        capability: tosca.capabilities.Container
-  #        node: tosca.nodes.indigo.Compute
-  #        relationship: tosca.relationships.HostedOn
-
-
+  tosca.nodes.indigo.CondorSubmit:
+    derived_from: tosca.nodes.SoftwareComponent
+    metadata:
+      icon: /images/htcondor.png
+    properties:
+      condor_daemons:
+        type: list
+        required: yes
+        entry_schema:
+          type: string
+        default: []
+      condor_master_ip:
+        required: yes
+        type: string
+    artifacts:
+      htcondor_role:
+        file: laniakea.htcondor,master
+        type: tosca.artifacts.AnsibleGalaxy.role
+    interfaces:
+      Standard:
+        configure:
+          implementation: https://raw.githubusercontent.com/Laniakea-elixir-it/tosca-types/master/artifacts/laniakea/htcondor/condor_submit_install.yml
+          inputs:
+            condor_host: { get_property: [ SELF, condor_master_ip ] }
+            condor_daemons: { get_property: [ SELF, condor_daemons ] }
+    requirements:
+      - host:
+          capability: tosca.capabilities.Container
+          node: tosca.nodes.indigo.Compute
+          relationship: tosca.relationships.HostedOn
